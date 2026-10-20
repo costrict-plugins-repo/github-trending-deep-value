@@ -1,0 +1,359 @@
+# Document Design Reference — DeepValue Analysis Reports
+
+**CRITICAL**: Copy the exact HTML structure and CSS from the example below. Do not invent your own design. Do not use CSS grid for metrics. Do not use border-right indicators for headings. Do not use large card boxes for KPIs.
+
+## Reference Example
+
+Below is a complete working HTML document that demonstrates the exact design. Your output must follow this structure, CSS, and component patterns exactly. Replace the content but keep the structure identical.
+
+```html
+<!DOCTYPE html>
+<html lang="he" dir="rtl"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ניתוח הזמנות — גילת טלקום גלובל (GLTL)</title>
+    <style>
+        /* FONT EMBEDDING: Read the file skills/tase-analysis/references/heebo-font.css
+           and paste its @font-face rules here. This embeds the Heebo font as base64
+           so it works in sandboxed environments without internet access.
+           Do NOT use @import url('https://fonts.googleapis.com/...') — it fails in sandbox. */
+        /* {{PASTE_HEEBO_FONT_FACE_RULES_HERE}} */
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        @page {
+            size: A4;
+            margin: 15mm 0 8mm 0;
+            background-color: white;
+
+            @bottom-center {
+                content: counter(page);
+                font-family: 'Heebo', sans-serif;
+                font-size: 11px;
+                color: #aab7b8;
+                padding-bottom: 3mm;
+            }
+        }
+
+        @page :first {
+            margin: 0;
+            background-color: #f8f9fa;
+
+            @bottom-center {
+                content: none;
+            }
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: #f8f9fa;
+            color: #2c3e50;
+            line-height: 1.85;
+            font-size: 15.5px;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a5276 0%, #2c3e50 100%);
+            color: white;
+            padding: 35px 75px;
+            border-radius: 0;
+            margin-bottom: 12px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .header .subtitle {
+            font-size: 15px;
+            opacity: 0.85;
+            font-weight: 300;
+        }
+
+        .header .date {
+            font-size: 13px;
+            opacity: 0.7;
+            margin-top: 10px;
+        }
+
+        /* Single white content body wraps ALL sections below the header */
+        .content-body {
+            background: white;
+            border-radius: 0;
+            padding: 50px 75px 40px;
+        }
+
+        /* Sections are separated by spacing only, no divider lines between sections */
+        .section {
+            margin-bottom: 28px;
+        }
+
+        .section h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a5276;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #eaecee;
+        }
+
+        .section h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1a5276;
+            margin-bottom: 12px;
+            margin-top: 20px;
+        }
+
+        .section p {
+            margin-bottom: 14px;
+            text-align: justify;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 18px 0;
+            font-size: 14px;
+        }
+
+        thead th {
+            background: #1a5276;
+            color: white;
+            padding: 10px 12px;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        tbody td {
+            padding: 9px 12px;
+            border-bottom: 1px solid #eaecee;
+        }
+
+        /* Numeric values must render LTR so minus signs appear on the left side of the number.
+           Apply this class to any <td> containing a number (negative or positive). */
+        tbody td.num {
+            direction: ltr;
+            text-align: right;
+        }
+
+        /* For inline negative numbers inside Hebrew narrative text (e.g., "הכנסות -27%"),
+           wrap them in <span dir="ltr"> to force the minus sign to the left side. */
+
+        tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        tbody tr.chain-highlight {
+            background: #eaf2f8;
+        }
+
+        .metric-box {
+            display: inline-block;
+            background: #eaf2f8;
+            border-radius: 8px;
+            padding: 6px 12px;
+            margin: 3px 4px 3px 0;
+            font-size: 13px;
+        }
+
+        .metric-box .label {
+            font-weight: 300;
+            font-size: 12px;
+            color: #5d6d7e;
+        }
+
+        .metric-box .value {
+            font-weight: 700;
+            color: #1a5276;
+        }
+
+        .chart-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .chart-container img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 75px;
+            margin-top: 20px;
+            border-radius: 0;
+        }
+
+        .disclaimer {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-align: center;
+            padding: 0;
+            margin: 0;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .badge-new { background: #d5f5e3; color: #1e8449; }
+        .badge-expansion { background: #fdebd0; color: #b9770e; }
+        .badge-framework { background: #d6eaf8; color: #2471a3; }
+        .badge-intl { background: #f5eef8; color: #7d3c98; }
+
+        .powered-by {
+            text-align: center;
+            font-size: 11px;
+            color: #aab7b8;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER: gradient banner with title, subtitle, date (stands alone on gray bg) -->
+        <div class="header">
+            <h1>ניתוח הזמנות — גילת טלקום גלובל בע"מ (GLTL)</h1>
+            <div class="subtitle">סקטור תקשורת ומדיה | שירותי תקשורת לוויינית</div>
+            <div class="date">תאריך הניתוח: 17 במרץ 2026 | תקופת ניתוח: YTD 2026 מול 2025</div>
+        </div>
+
+        <!-- CONTENT-BODY: single white box wrapping ALL sections -->
+        <div class="content-body">
+
+        <!-- SECTION: market snapshot with INLINE metric boxes (not grid cards!) -->
+        <div class="section">
+            <h2>תמונת שוק נוכחית</h2>
+            <p>מניית גילת טלקום נסחרת במחיר של 178.1 ש"ח, המשקף שווי שוק של כ-191 מיליון ש"ח...</p>
+            <div>
+                <span class="metric-box"><span class="label">מחיר</span> <span class="value">178.1 ₪</span></span>
+                <span class="metric-box"><span class="label">שווי שוק</span> <span class="value">191M ₪</span></span>
+                <span class="metric-box"><span class="label">P/E</span> <span class="value">12.4</span></span>
+                <span class="metric-box"><span class="label">P/S</span> <span class="value">0.75</span></span>
+                <span class="metric-box"><span class="label">EV/EBITDA</span> <span class="value">3.0</span></span>
+                <span class="metric-box"><span class="label">CAGR 5Y</span> <span class="value">5.1%</span></span>
+            </div>
+        </div>
+
+        <!-- SECTION: table with colored BADGES in cells -->
+        <div class="section">
+            <h2>מיפוי הזמנות — YTD 2026 (1.1–17.3)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>תאריך</th>
+                        <th>תיאור</th>
+                        <th>סכום (מ' ש"ח)</th>
+                        <th>סוג</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>01.01</td>
+                        <td>הזמנה מלקוח ישראלי (חברה-בת), 12 חודשים</td>
+                        <td>5.0</td>
+                        <td><span class="badge badge-new">חדשה</span></td>
+                    </tr>
+                    <tr class="chain-highlight">
+                        <td>05.01</td>
+                        <td>התקשרות לאספקת שירותי תקשורת לוויינית, לקוח ישראלי</td>
+                        <td>52.0</td>
+                        <td><span class="badge badge-new">חדשה</span></td>
+                    </tr>
+                    <tr>
+                        <td>28.01</td>
+                        <td>הרחבת הזמנה מלקוח ישראלי</td>
+                        <td>9.0</td>
+                        <td><span class="badge badge-expansion">הרחבה</span></td>
+                    </tr>
+                    <tr>
+                        <td>10.02</td>
+                        <td>הזמנת מסגרת מלקוח ישראלי</td>
+                        <td>10.0</td>
+                        <td><span class="badge badge-framework">מסגרת</span></td>
+                    </tr>
+                    <tr>
+                        <td>02.03</td>
+                        <td>הזמנה מלקוח בינלאומי, לשנת 2026</td>
+                        <td>3.8</td>
+                        <td><span class="badge badge-intl">בינלאומי</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>סך ההזמנות שדווחו ב-YTD 2026 עומד על כ-173.4 מיליון ש"ח...</p>
+        </div>
+
+        <!-- SECTION: with chart (base64 from generate_chart) -->
+        <div class="section">
+            <h2>השוואה ל-YTD 2025 ושנת 2025 המלאה</h2>
+            <p>הפער בין שתי התקופות חד באופן חריג...</p>
+            <div class="chart-container">
+                <img src="data:image/png;base64,{image_base64}" alt="השוואת הזמנות YTD">
+            </div>
+        </div>
+
+        <!-- SECTION: text only -->
+        <div class="section">
+            <h2>גורמים מניעים</h2>
+            <p>ניתוח הדוחות הכספיים מצביע על מספר גורמים...</p>
+            <p>גורם שני הוא ההסכם האסטרטגי...</p>
+        </div>
+
+        </div><!-- end content-body -->
+
+        <!-- FOOTER: gray band outside the white content body -->
+        <div class="footer">
+            <div class="disclaimer">
+                ניתוח זה מבוסס על דיווחים רגולטוריים בלבד ואינו מהווה ייעוץ השקעות. יש לבצע בדיקה עצמאית לפני קבלת החלטות השקעה.
+            </div>
+
+            <div class="powered-by">
+                Powered by DeepValue | נתונים עד 17.3.2026
+            </div>
+        </div>
+    </div>
+</body></html>
+```
+
+## Critical Design Rules
+
+**Font** — The document uses the **Heebo** font (weights 300, 400, 500, 700). Do NOT use `@import url('https://fonts.googleapis.com/...')` — it fails in sandboxed environments. Instead, read the file `skills/tase-analysis/references/heebo-font.css` and paste its `@font-face` rules directly into the `<style>` block. This embeds the font as base64 so it works offline.
+
+**Layout** — The document has THREE top-level visual blocks: (1) the **header** gradient banner (navy blue), (2) a single **content-body** white box containing ALL sections, and (3) a **footer** gray box with disclaimer and powered-by text. The header and footer are gray/navy boxes that mirror each other visually. Do NOT create separate white boxes per section. Sections inside the content-body are separated by vertical spacing (`margin-bottom: 28px`) only — no divider lines between sections.
+
+**Page margins** — Page 1 has `@page :first { margin: 0; background-color: #f8f9fa; }` so the header is flush to the top. Pages 2+ have `@page { margin: 15mm 0 8mm 0; background-color: white; }` — white top margin blends with the content body, 8mm bottom margin holds the page number.
+
+**Page numbers** — Appear centered at the bottom of every page except the first. Use `@page { @bottom-center { content: counter(page); } }` and `@page :first { @bottom-center { content: none; } }`.
+
+**Metric boxes** — ALWAYS use `<span class="metric-box">` as small inline badges in a single flowing row. NEVER use CSS grid, flexbox grids, or large card layouts for metrics. The metric boxes are small, inline, and flow naturally in one row.
+
+**Tables** — ALWAYS have `<thead>` with dark blue background (`#1a5276`) and white text. ALWAYS use colored `<span class="badge badge-TYPE">` in the last column to categorize rows. Badge types: `badge-new` (green), `badge-expansion` (orange), `badge-framework` (blue), `badge-intl` (purple). Use `chain-highlight` class on `<tr>` for related order chains. **Numeric values**: Any `<td>` containing a number (positive, negative, percentage, currency) MUST use `class="num"` — this applies `direction: ltr` so minus signs and symbols render on the correct side while keeping the value right-aligned in the cell. **Inline negative numbers in narrative text** (e.g., "הכנסות -27%") MUST be wrapped in `<span dir="ltr">-27%</span>` to force the minus to the left side.
+
+**Currency** — The currency symbol ALWAYS goes to the LEFT of the number: ₪1,234 (NOT 1,234₪). Stock prices from TASE are in agorot — do NOT add ₪ to stock price columns.
+
+**Dates** — Date format is ALWAYS dd/MM/YYYY (e.g., 20/03/2026). Never use MM-DD or YYYY-MM-DD formats.
+
+**Sections** — EVERY section is wrapped in `<div class="section">` inside the content-body. Sections are separated by spacing only (`margin-bottom: 28px`), NO divider lines between sections. Section titles use `<h2>` with blue color and bottom border. Sub-section titles use `<h3>`. NEVER use standalone headings outside of sections. NEVER use vertical side bars or border-right indicators.
+
+**Charts** — Use `<div class="chart-container"><img src="data:image/png;base64,{image_base64}"></div>`. Charts come from `generate_chart` tool only. NEVER use `image_url`. NEVER regenerate with matplotlib.
+
+**Footer** — Wrap disclaimer and powered-by in `<div class="footer">` — a gray box (`#f8f9fa`) mirroring the header design, OUTSIDE the content-body white box. Fixed height, not meant to fill to page bottom.
+
+**Disclaimer** — Plain centered gray text inside the footer. `color: #7f8c8d; text-align: center; font-size: 12px`.
+
+**Powered-by** — `<div class="powered-by">Powered by DeepValue | נתונים עד [date]</div>` — inside the footer.
+
+**DO NOT** — No empty sections. No grid card metrics. No border-right on headings. No inventing your own CSS. No separate white boxes per section.
